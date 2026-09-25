@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Park254 — Admin Login{% endblock %}
+{% block content %}
+
+<h1 style="font-size: 26px; margin-bottom: 4px;">Admin login</h1>
+<p style="color: var(--muted); margin-top: 0; margin-bottom: 28px;">
+    Enter the admin password to manage capacity and view revenue.
+</p>
+
+<div class="panel" style="max-width: 360px;">
+    <form method="POST" action="/admin/login">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required autofocus>
+        <button type="submit">Log in</button>
+    </form>
+
+    {% if error %}
+        <div class="result error">{{ error }}</div>
+    {% endif %}
+</div>
+
+{% endblock %}

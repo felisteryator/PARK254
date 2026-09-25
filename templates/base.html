@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Park254{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink: #1F2321;
+            --paper: #F7F5F0;
+            --yellow: #F4B400;
+            --green: #2F7A4E;
+            --red: #C1432E;
+            --muted: #6B7069;
+            --panel: #FFFFFF;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: var(--paper);
+            color: var(--ink);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.5;
+        }
+
+        h1, h2, h3, .brand, .slot-number {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        header {
+            background: var(--ink);
+            color: var(--paper);
+            padding: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .barrier-stripe {
+            height: 6px;
+            background: repeating-linear-gradient(
+                45deg,
+                var(--yellow),
+                var(--yellow) 14px,
+                var(--ink) 14px,
+                var(--ink) 28px
+            );
+        }
+
+        .header-inner {
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            color: var(--paper);
+            text-decoration: none;
+        }
+
+        .brand span { color: var(--yellow); }
+
+        nav a {
+            color: var(--paper);
+            text-decoration: none;
+            font-size: 15px;
+            margin-left: 20px;
+            opacity: 0.85;
+        }
+
+        nav a:hover, nav a:focus-visible { opacity: 1; text-decoration: underline; }
+
+        main {
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 40px 24px 64px;
+        }
+
+        .panel {
+            background: var(--panel);
+            border: 1px solid #E7E3D8;
+            border-radius: 4px;
+            padding: 28px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin: 18px 0 6px;
+        }
+
+        input[type="text"], input[type="tel"], input[type="email"], input[type="number"] {
+            width: 100%;
+            padding: 11px 12px;
+            font-size: 15px;
+            font-family: inherit;
+            border: 1px solid #D8D3C4;
+            border-radius: 3px;
+            background: var(--paper);
+            color: var(--ink);
+        }
+
+        input:focus-visible {
+            outline: 2px solid var(--yellow);
+            outline-offset: 1px;
+        }
+
+        button {
+            margin-top: 24px;
+            background: var(--ink);
+            color: var(--paper);
+            border: none;
+            padding: 13px 24px;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: inherit;
+            border-radius: 3px;
+            cursor: pointer;
+            border-bottom: 3px solid var(--yellow);
+        }
+
+        button:hover { background: #33362f; }
+        button:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }
+
+        .result {
+            margin-top: 24px;
+            padding: 16px 18px;
+            border-radius: 3px;
+            font-size: 15px;
+        }
+
+        .result.success { background: #EAF4EC; border: 1px solid var(--green); color: #1F4E32; }
+        .result.error { background: #FBEAE6; border: 1px solid var(--red); color: #7A2A1B; }
+
+        @media (prefers-reduced-motion: reduce) {
+            * { transition: none !important; animation: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-inner">
+            <a href="/" class="brand">Park<span>254</span></a>
+            <nav>
+                <a href="/">Slots</a>
+                <a href="/entry">Enter</a>
+                <a href="/exit">Exit</a>
+                <a href="/admin">Admin</a>
+            </nav>
+        </div>
+        <div class="barrier-stripe"></div>
+    </header>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

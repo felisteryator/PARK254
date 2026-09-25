@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Park254 — Vehicle Exit{% endblock %}
+{% block content %}
+
+<h1 style="font-size: 26px; margin-bottom: 4px;">Vehicle exit</h1>
+<p style="color: var(--muted); margin-top: 0; margin-bottom: 28px;">
+    Pay your parking fee to open the barrier.
+</p>
+
+<div class="panel">
+    {% if result %}
+        <div id="result-overlay" style="
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(31, 35, 33, 0.55);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1000;
+        ">
+            <div style="
+                background: var(--panel); border-radius: 5px; padding: 28px 32px;
+                max-width: 380px; text-align: center; box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+                border-top: 4px solid {{ 'var(--green)' if result.success else 'var(--red)' }};
+            ">
+                <p style="margin: 0 0 10px; font-size: 16px; color: var(--ink);">
+                    {% if result.success %}
+                        Barrier opening. Parked for {{ result.duration_minutes }} minutes — Kshs. {{ result.fee }} paid.
+                    {% else %}
+                        {{ result.message }}
+                    {% endif %}
+                </p>
+                {% if result.entry_time %}
+                <p style="margin: 0; font-size: 13px; color: var(--muted);">
+                    Entry: {{ result.entry_time }}
+                    {% if result.exit_time %} &nbsp;|&nbsp; Exit: {{ result.exit_time }}{% endif %}
+                </p>
+                {% endif %}
+            </div>
+        </div>
+        <script>
+            setTimeout(function () {
+                var overlay = document.getElementById('result-overlay');
+                if (overlay) {
+                    overlay.style.transition = 'opacity 0.4s ease';
+                    overlay.style.opacity = '0';
+                    setTimeout(function () { overlay.style.display = 'none'; }, 400);
+                }
+            }, 5000);
+        </script>
+    {% endif %}
+
+    <form method="POST" action="/exit" autocomplete="off">
+        <label for="plate">Vehicle plate number</label>
+        <input type="text" id="plate" name="plate" placeholder="e.g. KAA123A" autocomplete="off" required>
+
+        <button type="button" id="check-fee-btn" style="
+            margin-top: 10px; background: transparent; color: var(--ink);
+            border: 1px solid #D8D3C4; border-bottom: 1px solid #D8D3C4;
+            padding: 9px 16px; font-size: 14px;
+        ">Check amount due</button>
+
+        <div id="fee-info" style="display: none; margin-top: 16px; padding: 14px 16px; background: var(--paper); border: 1px solid #E7E3D8; border-radius: 3px; font-size: 14px;">
+            <div><strong>Entry time:</strong> <span id="fee-entry-time"></span></div>
+            <div><strong>Time parked:</strong> <span id="fee-duration"></span> minutes</div>
+            <div><strong>Amount due:</strong> Kshs. <span id="fee-amount"></span></div>
+        </div>
+        <div id="fee-error" style="display: none; margin-top: 12px;" class="result error"></div>
+
+        <label for="amount_paid">Amount paid (Kshs.)</label>
+        <input type="number" id="amount_paid" name="amount_paid" min="0" step="1" required>
+
+        <button type="submit">Pay and exit</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById('check-fee-btn').addEventListener('click', async function () {
+        var plate = document.getElementById('plate').value.trim();
+        var feeInfo = document.getElementById('fee-info');
+        var feeError = document.getElementById('fee-error');
+        feeInfo.style.display = 'none';
+        feeError.style.display = 'none';
+
+        if (!plate) {
+            feeError.textContent = 'Enter a plate number first.';
+            feeError.style.display = 'block';
+            return;
+        }
+
+        try {
+            var response = await fetch('/exit/check?plate=' + encodeURIComponent(plate));
+            var data = await response.json();
+
+            if (!data.success) {
+                feeError.textContent = data.message;
+                feeError.style.display = 'block';
+                return;
+            }
+
+            document.getElementById('fee-entry-time').textContent = data.entry_time;
+            document.getElementById('fee-duration').textContent = data.duration_minutes;
+            document.getElementById('fee-amount').textContent = data.fee;
+            feeInfo.style.display = 'block';
+
+            // Convenience — pre-fill the amount field with the exact fee due, still editable.
+            document.getElementById('amount_paid').value = data.fee;
+        } catch (err) {
+            feeError.textContent = 'Could not check fee. Try again.';
+            feeError.style.display = 'block';
+        }
+    });
+</script>
+
+{% endblock %}

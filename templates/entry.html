@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Park254 — Vehicle Entry{% endblock %}
+{% block content %}
+
+<h1 style="font-size: 26px; margin-bottom: 4px;">Vehicle entry</h1>
+<p style="color: var(--muted); margin-top: 0; margin-bottom: 28px;">
+    Register your arrival to be assigned a slot.
+</p>
+
+<div class="panel">
+    {% if result %}
+        <div id="result-overlay" style="
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(31, 35, 33, 0.55);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1000;
+        ">
+            <div style="
+                background: var(--panel); border-radius: 5px; padding: 28px 32px;
+                max-width: 380px; text-align: center; box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+                border-top: 4px solid {{ 'var(--green)' if result.success else 'var(--red)' }};
+            ">
+                <p style="margin: 0; font-size: 16px; color: var(--ink);">
+                    {% if result.success %}
+                        Vehicle <strong>{{ result.plate }}</strong> has been assigned to <strong>Slot {{ result.slot_id }}</strong>.
+                    {% else %}
+                        {{ result.message }}
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        <script>
+            setTimeout(function () {
+                var overlay = document.getElementById('result-overlay');
+                if (overlay) {
+                    overlay.style.transition = 'opacity 0.4s ease';
+                    overlay.style.opacity = '0';
+                    setTimeout(function () { overlay.style.display = 'none'; }, 400);
+                }
+            }, 5000);
+        </script>
+    {% endif %}
+
+    <form method="POST" action="/entry" autocomplete="off">
+        <label for="full_name">Full name</label>
+        <input type="text" id="full_name" name="full_name" autocomplete="off" required>
+
+        <label for="phone_number">Phone number</label>
+        <input type="tel" id="phone_number" name="phone_number" autocomplete="off" required>
+
+        <label for="email">Email (optional)</label>
+        <input type="email" id="email" name="email" autocomplete="off">
+
+        <label for="plate">Vehicle plate number</label>
+        <input type="text" id="plate" name="plate" placeholder="e.g. KAA123A" autocomplete="off" required>
+
+        <button type="submit">Register entry</button>
+    </form>
+</div>
+
+{% endblock %}
