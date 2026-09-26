@@ -13,22 +13,21 @@
         <div style="
             padding: 16px 8px;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+            gap: 4px;
             border-radius: 3px;
             background: {{ 'var(--green)' if slot.status == 'FREE' else 'var(--red)' }};
             color: var(--paper);
         ">
             <span class="slot-number" style="font-weight: 700; font-size: 14px;">Slot {{ slot.slot_id }}</span>
+            <span style="font-size: 12px; font-weight: 600;">
+                {{ 'Free' if slot.status == 'FREE' else 'Occupied' }}
+            </span>
         </div>
         {% endfor %}
     </div>
 </div>
-
-<p style="margin-top: 20px; font-size: 14px; color: var(--muted);">
-    <span style="display: inline-block; width: 10px; height: 10px; background: var(--green); border-radius: 2px; margin-right: 6px;"></span> Free
-    &nbsp;&nbsp;
-    <span style="display: inline-block; width: 10px; height: 10px; background: var(--red); border-radius: 2px; margin-right: 6px;"></span> Occupied
-</p>
 
 {% endblock %}

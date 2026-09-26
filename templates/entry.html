@@ -48,8 +48,19 @@
         <label for="phone_number">Phone number</label>
         <input type="tel" id="phone_number" name="phone_number" autocomplete="off" required>
 
-        <label for="email">Email (optional)</label>
-        <input type="email" id="email" name="email" autocomplete="off">
+        <label for="vehicle_type_select">Vehicle type</label>
+        <select id="vehicle_type_select" required>
+            <option value="" disabled selected>Select vehicle type</option>
+            <option value="Car">Car</option>
+            <option value="SUV">SUV / 4WD</option>
+            <option value="Van">Van</option>
+            <option value="Motorcycle">Motorcycle</option>
+            <option value="Truck">Truck</option>
+            <option value="Bus">Bus</option>
+            <option value="Other">Other (specify)</option>
+        </select>
+        <input type="text" id="vehicle_type_other" placeholder="Enter vehicle type" autocomplete="off" style="display: none; margin-top: 10px;">
+        <input type="hidden" id="vehicle_type" name="vehicle_type" value="">
 
         <label for="plate">Vehicle plate number</label>
         <input type="text" id="plate" name="plate" placeholder="e.g. KAA123A" autocomplete="off" required>
@@ -57,5 +68,33 @@
         <button type="submit">Register entry</button>
     </form>
 </div>
+
+<script>
+    var vehicleTypeSelect = document.getElementById('vehicle_type_select');
+    var vehicleTypeOther = document.getElementById('vehicle_type_other');
+    var vehicleTypeHidden = document.getElementById('vehicle_type');
+
+    function syncVehicleType() {
+        if (vehicleTypeSelect.value === 'Other') {
+            vehicleTypeOther.style.display = 'block';
+            vehicleTypeHidden.value = vehicleTypeOther.value.trim();
+        } else {
+            vehicleTypeOther.style.display = 'none';
+            vehicleTypeOther.value = '';
+            vehicleTypeHidden.value = vehicleTypeSelect.value;
+        }
+    }
+
+    vehicleTypeSelect.addEventListener('change', syncVehicleType);
+    vehicleTypeOther.addEventListener('input', syncVehicleType);
+
+    document.querySelector('form[action="/entry"]').addEventListener('submit', function (e) {
+        syncVehicleType();
+        if (vehicleTypeSelect.value === 'Other' && !vehicleTypeOther.value.trim()) {
+            e.preventDefault();
+            vehicleTypeOther.focus();
+        }
+    });
+</script>
 
 {% endblock %}

@@ -28,7 +28,7 @@ def is_currently_parked(plate):
     return exists
 
 
-def _save_vehicle(plate, full_name, phone_number, email):
+def _save_vehicle(plate, full_name, phone_number, vehicle_type):
     """
     Inserts the vehicle if it's new, or updates contact details if this plate
     has parked before (e.g. phone number changed since last visit).
@@ -38,19 +38,19 @@ def _save_vehicle(plate, full_name, phone_number, email):
     cur.execute("SELECT 1 FROM Vehicle WHERE plate = ?", (plate,))
     if cur.fetchone():
         cur.execute(
-            "UPDATE Vehicle SET full_name = ?, phone_number = ?, email = ? WHERE plate = ?",
-            (full_name, phone_number, email, plate)
+            "UPDATE Vehicle SET full_name = ?, phone_number = ?, vehicle_type = ? WHERE plate = ?",
+            (full_name, phone_number, vehicle_type, plate)
         )
     else:
         cur.execute(
-            "INSERT INTO Vehicle (plate, full_name, phone_number, email) VALUES (?, ?, ?, ?)",
-            (plate, full_name, phone_number, email)
+            "INSERT INTO Vehicle (plate, full_name, phone_number, vehicle_type) VALUES (?, ?, ?, ?)",
+            (plate, full_name, phone_number, vehicle_type)
         )
     conn.commit()
     conn.close()
 
 
-def register_entry(full_name, phone_number, email, plate):
+def register_entry(full_name, phone_number, vehicle_type, plate):
     """
     Matches registerEntry() from part (a).
     Returns a dict: {"success": bool, "message": str, "slot_id": int or None, "plate": str}
@@ -64,7 +64,7 @@ def register_entry(full_name, phone_number, email, plate):
     if slot_id is None:
         return {"success": False, "message": "No slots available. Please try another parking facility.", "slot_id": None, "plate": plate}
 
-    _save_vehicle(plate, full_name, phone_number, email)
+    _save_vehicle(plate, full_name, phone_number, vehicle_type)
     slot_management.occupy_slot(slot_id)
 
     conn = get_connection()

@@ -46,10 +46,10 @@ def entry():
     if request.method == "POST":
         full_name = request.form.get("full_name", "").strip()
         phone_number = request.form.get("phone_number", "").strip()
-        email = request.form.get("email", "").strip()
+        vehicle_type = request.form.get("vehicle_type", "").strip()
         plate = request.form.get("plate", "").strip()
 
-        result = vehicle_entry.register_entry(full_name, phone_number, email, plate)
+        result = vehicle_entry.register_entry(full_name, phone_number, vehicle_type, plate)
 
     return render_template("entry.html", result=result)
 
@@ -64,12 +64,13 @@ def exit_page():
     if request.method == "POST":
         plate = request.form.get("plate", "").strip()
         amount_str = request.form.get("amount_paid", "0").strip()
+        payment_method = request.form.get("payment_method", "").strip()
         try:
             amount_paid = float(amount_str)
         except ValueError:
             amount_paid = -1  # forces "insufficient payment" rather than crashing on bad input
 
-        result = payment_exit.process_exit(plate, amount_paid)
+        result = payment_exit.process_exit(plate, amount_paid, payment_method)
 
     return render_template("exit.html", result=result)
 
@@ -119,6 +120,33 @@ def admin():
     active_sessions = reporting.get_active_sessions()
     return render_template("admin.html", result=result, current_total=current_total,
                             current_free=current_free, revenue=revenue, active_sessions=active_sessions)
+
+
+@app.route("/admin/rates", methods=["GET", "POST"])
+@login_required
+def admin_rates():
+    """
+    GET: show the current fee tiers as an editable form.
+    POST: validate and save the new rates via the Reporting/Admin Module.
+    """
+    result = None
+    if request.method == "POST":
+        tiers = reporting.get_fee_tiers()  # need tier_ids to know which rows to update
+        tier_updates = []
+        for tier in tiers:
+            tid = tier["tier_id"]
+            try:
+                max_minutes = int(request.form.get(f"max_minutes_{tid}", ""))
+                fee = float(request.form.get(f"fee_{tid}", ""))
+            except ValueError:
+                result = {"success": False, "message": "All fields must be valid numbers."}
+                break
+            tier_updates.append({"tier_id": tid, "max_minutes": max_minutes, "fee": fee})
+        else:
+            result = reporting.update_fee_tiers(tier_updates)
+
+    tiers = reporting.get_fee_tiers()
+    return render_template("admin_rates.html", tiers=tiers, result=result)
 
 
 @app.route("/history")

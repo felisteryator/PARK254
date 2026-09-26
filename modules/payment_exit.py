@@ -19,18 +19,30 @@ def open_barrier():
     print("Barrier opening...")
 
 
-def process_exit(plate, amount_paid):
+VALID_PAYMENT_METHODS = {"mpesa", "card", "cash"}
+
+
+def process_exit(plate, amount_paid, payment_method):
     """
-    Matches processExit() from part (a).
+    Matches processExit() from part (a), extended to record which payment
+    method confirmed the transaction (M-Pesa, Card, or Cash), per the
+    client brief's requirement to collect payment by any of the three.
+
     Returns {"success": bool, "message": str, "duration_minutes": int or None,
-             "fee": float or None, "entry_time": str or None, "exit_time": str or None}
+             "fee": float or None, "entry_time": str or None, "exit_time": str or None,
+             "payment_method": str or None}
     """
     plate = plate.strip().upper().replace(" ", "")
+    payment_method = (payment_method or "").strip().lower()
+
+    if payment_method not in VALID_PAYMENT_METHODS:
+        return {"success": False, "message": "Select a valid payment method (M-Pesa, Card, or Cash).",
+                "duration_minutes": None, "fee": None, "entry_time": None, "exit_time": None, "payment_method": None}
 
     session = fee_calculation.get_active_session(plate)
     if session is None:
         return {"success": False, "message": "Vehicle not found in parking. Exit denied.",
-                "duration_minutes": None, "fee": None, "entry_time": None, "exit_time": None}
+                "duration_minutes": None, "fee": None, "entry_time": None, "exit_time": None, "payment_method": None}
 
     fee_result = fee_calculation.calculate_fee(plate)
     duration_minutes = fee_result["duration_minutes"]
@@ -39,7 +51,8 @@ def process_exit(plate, amount_paid):
 
     if amount_paid < fee:
         return {"success": False, "message": f"Insufficient payment. Amount due: Kshs. {fee}",
-                "duration_minutes": duration_minutes, "fee": fee, "entry_time": entry_time, "exit_time": None}
+                "duration_minutes": duration_minutes, "fee": fee, "entry_time": entry_time,
+                "exit_time": None, "payment_method": payment_method}
 
     open_barrier()
 
@@ -48,9 +61,9 @@ def process_exit(plate, amount_paid):
     cur = conn.cursor()
     cur.execute("""
         UPDATE ParkingSession
-        SET exit_time = ?, fee_charged = ?, status = 'COMPLETED'
+        SET exit_time = ?, fee_charged = ?, payment_method = ?, status = 'COMPLETED'
         WHERE session_id = ?
-    """, (exit_time, fee, session["session_id"]))
+    """, (exit_time, fee, payment_method, session["session_id"]))
     conn.commit()
     conn.close()
 
@@ -62,5 +75,6 @@ def process_exit(plate, amount_paid):
         "duration_minutes": duration_minutes,
         "fee": fee,
         "entry_time": entry_time,
-        "exit_time": exit_time
+        "exit_time": exit_time,
+        "payment_method": payment_method
     }

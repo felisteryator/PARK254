@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Park254 — Parking Rates{% endblock %}
+{% block content %}
+
+<h1 style="font-size: 26px; margin-bottom: 4px;">Parking rates</h1>
+<p style="color: var(--muted); margin-top: 0; margin-bottom: 28px;">
+    Edit the fee brackets used by the system. Each row's time limit must be
+    greater than the one above it — these are cumulative brackets, not per-minute rates.
+</p>
+
+<div class="panel">
+    {% if result %}
+        <div class="result {{ 'success' if result.success else 'error' }}" style="margin-top: 0; margin-bottom: 20px;">
+            {{ result.message }}
+        </div>
+    {% endif %}
+
+    <form method="POST" action="/admin/rates">
+        <table style="width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 4px;">
+            <thead>
+                <tr style="text-align: left; border-bottom: 1px solid #E7E3D8;">
+                    <th style="padding: 10px 8px;">Tier</th>
+                    <th style="padding: 10px 8px;">Up to (minutes)</th>
+                    <th style="padding: 10px 8px;">Fee (Kshs.)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tier in tiers %}
+                <tr style="border-bottom: 1px solid #F0EDE3;">
+                    <td style="padding: 10px 8px; font-weight: 600;">{{ loop.index }}</td>
+                    <td style="padding: 10px 8px;">
+                        <input type="number" name="max_minutes_{{ tier.tier_id }}" value="{{ tier.max_minutes }}" min="1" step="1" style="margin: 0;" required>
+                    </td>
+                    <td style="padding: 10px 8px;">
+                        <input type="number" name="fee_{{ tier.tier_id }}" value="{{ tier.fee }}" min="0" step="1" style="margin: 0;" required>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <button type="submit">Save rates</button>
+    </form>
+</div>
+
+<a href="/admin" style="
+    display: inline-block; margin-top: 20px; background: var(--ink); color: var(--paper);
+    text-decoration: none; padding: 13px 24px; font-size: 15px; font-weight: 600;
+    font-family: 'Inter', sans-serif; border-radius: 3px; border-bottom: 3px solid var(--yellow);
+">Back to Admin</a>
+
+{% endblock %}

@@ -22,7 +22,8 @@
             ">
                 <p style="margin: 0 0 10px; font-size: 16px; color: var(--ink);">
                     {% if result.success %}
-                        Barrier opening. Parked for {{ result.duration_minutes }} minutes — Kshs. {{ result.fee }} paid.
+                        Barrier opening. Parked for {{ result.duration_minutes }} minutes — Kshs. {{ result.fee }} paid via
+                        {% if result.payment_method == 'mpesa' %}M-Pesa{% else %}{{ result.payment_method|capitalize }}{% endif %}.
                     {% else %}
                         {{ result.message }}
                     {% endif %}
@@ -47,7 +48,7 @@
         </script>
     {% endif %}
 
-    <form method="POST" action="/exit" autocomplete="off">
+    <form method="POST" action="/exit" id="exit-form" autocomplete="off">
         <label for="plate">Vehicle plate number</label>
         <input type="text" id="plate" name="plate" placeholder="e.g. KAA123A" autocomplete="off" required>
 
@@ -67,8 +68,36 @@
         <label for="amount_paid">Amount paid (Kshs.)</label>
         <input type="number" id="amount_paid" name="amount_paid" min="0" step="1" required>
 
-        <button type="submit">Pay and exit</button>
+        <label>Payment method</label>
+        <div style="display: flex; gap: 12px; margin-top: 6px;">
+            <label style="display: flex; align-items: center; gap: 6px; font-weight: 400; margin: 0; padding: 10px 14px; border: 1px solid #D8D3C4; border-radius: 3px; flex: 1; cursor: pointer;">
+                <input type="radio" name="payment_method" value="mpesa" required style="width: auto;"> M-Pesa
+            </label>
+            <label style="display: flex; align-items: center; gap: 6px; font-weight: 400; margin: 0; padding: 10px 14px; border: 1px solid #D8D3C4; border-radius: 3px; flex: 1; cursor: pointer;">
+                <input type="radio" name="payment_method" value="card" required style="width: auto;"> Card
+            </label>
+            <label style="display: flex; align-items: center; gap: 6px; font-weight: 400; margin: 0; padding: 10px 14px; border: 1px solid #D8D3C4; border-radius: 3px; flex: 1; cursor: pointer;">
+                <input type="radio" name="payment_method" value="cash" required style="width: auto;"> Cash
+            </label>
+        </div>
+
+        <button type="button" id="pay-btn">Pay and exit</button>
     </form>
+</div>
+
+<!-- Payment confirmation dialog — simulated since no real payment gateway is connected -->
+<div id="confirm-overlay" style="
+    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(31, 35, 33, 0.55);
+    align-items: center; justify-content: center; z-index: 1000;
+">
+    <div style="background: var(--panel); border-radius: 5px; padding: 28px 32px; max-width: 380px; text-align: center; box-shadow: 0 8px 30px rgba(0,0,0,0.25); border-top: 4px solid var(--yellow);">
+        <p id="confirm-text" style="margin: 0 0 20px; font-size: 15px; color: var(--ink);"></p>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+            <button type="button" id="confirm-cancel-btn" style="margin-top: 0; background: transparent; color: var(--ink); border: 1px solid #D8D3C4; border-bottom: 1px solid #D8D3C4; padding: 11px 20px;">Cancel</button>
+            <button type="button" id="confirm-pay-btn" style="margin-top: 0;">Confirm payment</button>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -99,13 +128,42 @@
             document.getElementById('fee-duration').textContent = data.duration_minutes;
             document.getElementById('fee-amount').textContent = data.fee;
             feeInfo.style.display = 'block';
-
-            // Convenience — pre-fill the amount field with the exact fee due, still editable.
             document.getElementById('amount_paid').value = data.fee;
         } catch (err) {
             feeError.textContent = 'Could not check fee. Try again.';
             feeError.style.display = 'block';
         }
+    });
+
+    var confirmMessages = {
+        mpesa: 'An M-Pesa prompt has been sent to your phone. Enter your M-Pesa PIN to confirm payment of Kshs. ',
+        card: 'Please tap or insert your card on the reader to confirm payment of Kshs. ',
+        cash: 'Confirm that Kshs. AMOUNT has been received in cash.'
+    };
+
+    document.getElementById('pay-btn').addEventListener('click', function () {
+        var form = document.getElementById('exit-form');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        var amount = document.getElementById('amount_paid').value;
+        var methodInput = form.querySelector('input[name="payment_method"]:checked');
+        var method = methodInput.value;
+
+        var text = confirmMessages[method].replace('AMOUNT', amount);
+        if (method !== 'cash') { text += amount + '.'; }
+        document.getElementById('confirm-text').textContent = text;
+        document.getElementById('confirm-overlay').style.display = 'flex';
+    });
+
+    document.getElementById('confirm-cancel-btn').addEventListener('click', function () {
+        document.getElementById('confirm-overlay').style.display = 'none';
+    });
+
+    document.getElementById('confirm-pay-btn').addEventListener('click', function () {
+        document.getElementById('exit-form').submit();
     });
 </script>
 

@@ -18,6 +18,7 @@
                 <th style="padding: 12px 16px;">Entry</th>
                 <th style="padding: 12px 16px;">Exit</th>
                 <th style="padding: 12px 16px;">Fee</th>
+                <th style="padding: 12px 16px;">Paid via</th>
             </tr>
         </thead>
         <tbody>
@@ -29,6 +30,9 @@
                 <td style="padding: 12px 16px; color: var(--muted);">{{ s.entry_time }}</td>
                 <td style="padding: 12px 16px; color: var(--muted);">{{ s.exit_time }}</td>
                 <td style="padding: 12px 16px;">Kshs. {{ s.fee_charged }}</td>
+                <td style="padding: 12px 16px; color: var(--muted);">
+                    {% if s.payment_method == 'mpesa' %}M-Pesa{% elif s.payment_method %}{{ s.payment_method|capitalize }}{% else %}—{% endif %}
+                </td>
             </tr>
             {% endfor %}
         </tbody>

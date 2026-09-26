@@ -46,9 +46,16 @@ def init_db():
             plate           TEXT PRIMARY KEY,
             full_name       TEXT NOT NULL,
             phone_number    TEXT NOT NULL,
-            email           TEXT
+            email           TEXT,
+            vehicle_type    TEXT
         )
     """)
+
+    # Migration: add vehicle_type to a Vehicle table created before this column existed.
+    cur.execute("PRAGMA table_info(Vehicle)")
+    existing_vehicle_columns = [row[1] for row in cur.fetchall()]
+    if "vehicle_type" not in existing_vehicle_columns:
+        cur.execute("ALTER TABLE Vehicle ADD COLUMN vehicle_type TEXT")
 
     cur.execute("""
         CREATE TABLE IF NOT EXISTS ParkingSession (
@@ -58,9 +65,16 @@ def init_db():
             entry_time      TEXT NOT NULL,
             exit_time       TEXT,
             fee_charged     REAL,
+            payment_method  TEXT,
             status          TEXT NOT NULL CHECK (status IN ('ACTIVE', 'COMPLETED'))
         )
     """)
+
+    # Migration: add payment_method to a ParkingSession table created before this column existed.
+    cur.execute("PRAGMA table_info(ParkingSession)")
+    existing_columns = [row[1] for row in cur.fetchall()]
+    if "payment_method" not in existing_columns:
+        cur.execute("ALTER TABLE ParkingSession ADD COLUMN payment_method TEXT")
 
     cur.execute("""
         CREATE TABLE IF NOT EXISTS FeeTier (
