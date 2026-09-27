@@ -105,4 +105,4 @@ built from:
 - **The admin password is a single shared secret**, stored in plaintext in
   `app.py` — adequate for demonstrating access control, not for a
   production deployment.
-- 
+
