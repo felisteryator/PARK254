@@ -105,6 +105,4 @@ built from:
 - **The admin password is a single shared secret**, stored in plaintext in
   `app.py` — adequate for demonstrating access control, not for a
   production deployment.
-- **No receipt numbering or VAT breakdown** on the financial record — the
-  History page and revenue total give a basic audit trail, but not a
-  formal accounting-grade one.
+- 
