@@ -176,7 +176,7 @@ def admin_logout():
     session.pop("is_admin", None)
     return redirect(url_for("admin_login"))
 
+init_db() # ensures tables exist and slots are seeded before the server starts
 
 if __name__ == "__main__":
-    init_db()  # ensures tables exist and slots are seeded before the server starts
     app.run(debug=True, port=5000)
